@@ -14,8 +14,10 @@ class WaxNFT:
         self.sale_id = sale_id
         self.previous_owner = None
 
+    
     "--------------UTILITY METHODS--------------"
 
+    
     def fetch_owner(self):
         """Ensures that self.owner is fetched and available."""
 
@@ -36,6 +38,7 @@ class WaxNFT:
         
         return self.owner
 
+    
     "--------------INFORMATION METHODS--------------"
 
 
@@ -122,7 +125,7 @@ class WaxNFT:
                 raise ValueError(f"NFT {self.nft_id} previous owner not found.")
         else:
             raise ValueError(f"Failed to fetch previous owner for NFT {self.nft_id}. HTTP Status: {response.status_code}")
-
+            
     
     "--------------TRANSACTION METHODS--------------"
 
