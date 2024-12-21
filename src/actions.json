@@ -1,26 +1,7 @@
 [
     {
-        "account": "atomicmarket",
-        "name": "announcesale",
-        "authorization": [
-            {
-                "actor": "lean4lan.gm",
-                "permission": "active"
-            }
-        ],
-        "data": {
-            "seller": "lean4lan.gm",
-            "asset_ids": [
-                1099895475693
-            ],
-            "listing_price": "1.00000000 WAX",
-            "settlement_symbol": "8,WAX",
-            "maker_marketplace": ""
-        }
-    },
-    {
         "account": "atomicassets",
-        "name": "createoffer",
+        "name": "transfer",
         "authorization": [
             {
                 "actor": "lean4lan.gm",
@@ -28,13 +9,12 @@
             }
         ],
         "data": {
-            "memo": "sale",
-            "sender_asset_ids": [
-                1099895475693
+            "from": "lean4lan.gm",
+            "to": "5wme4.wam",
+            "asset_ids": [
+                "1099950207078"
             ],
-            "recipient": "atomicmarket",
-            "recipient_asset_ids": [],
-            "sender": "lean4lan.gm"
+            "memo": ""
         }
     }
 ]

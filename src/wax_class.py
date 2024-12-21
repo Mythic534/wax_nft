@@ -27,7 +27,6 @@ class WaxNFT:
 
             if response.status_code == 200:
                 data = response.json().get("data")
-
                 if data:
                     self.owner = data.get("owner")
 
@@ -55,10 +54,7 @@ class WaxNFT:
                 self.template_id = data.get("template", {}).get("template_id", self.template_id)
                 self.template_name = data.get("template", {}).get("immutable_data", {}).get("name", self.template_name)
                 
-                # Fetch market details (price and sale_id)
                 self.fetch_market_details()
-
-                # Fetch previous owner
                 self.fetch_previous_owner()
 
                 details = {
@@ -219,8 +215,8 @@ class WaxNFT:
         print(f"NFT {self.nft_id} listed for sale at {price} WAX.")
 
 
-    def buy(self, buyer, sale_id, quantity, marketplace="yourmarketplace"):
+    def buy(self):
         """Buys the NFT listed for sale with bundled transactions."""
 
-        print("buy method not implemented")
+        print("Buy method not implemented")
         pass
