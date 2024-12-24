@@ -1,5 +1,5 @@
 from src.wax_class import WaxNFT
-from src.wax_tools import get_collection
+from src.wax_tools import get_collection_by_category, get_collection_by_templates
 
 nft = WaxNFT(1099895475693)
 
@@ -24,5 +24,5 @@ print(nft.price)
 """
 
 #nft.transfer("5wme4.wam")
-
+nft.buy("lean4lan.gm")
 #nft.sell(1)

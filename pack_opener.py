@@ -8,8 +8,8 @@ template_ids = ["350147", "408663"]  # Active card Mining pack, Active card War 
 rate_limit_seconds = 2
 
 
-def wait():
-    time.sleep(rate_limit_seconds)
+def wait(seconds=rate_limit_seconds):
+    time.sleep(seconds)
 
 
 while True:
@@ -51,8 +51,8 @@ while True:
             if source == "battleminers" and active_id not in new_actives:
                 new_actives.append(active_id)
 
-        print(f"Debug - senders: {senders}")
-        print(f"Debug - actives: {new_actives}")
+        #print(f"Debug - senders: {senders}")
+        #print(f"Debug - actives: {new_actives}")
         
         if len(new_actives) == len(senders):
             break
@@ -65,7 +65,7 @@ while True:
             try:
                 nft = WaxNFT(active)
                 nft.transfer(sender)
-                wait()
+                wait(0.5)
                 break
             except:
                 print("Retrying transfer..")

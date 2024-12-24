@@ -6,7 +6,7 @@ import requests
 class WaxNFT:
 
     def __init__(self, nft_id, owner=None, template_id=None, template_name=None, price=None, sale_id=None):
-        self.nft_id = nft_id
+        self.nft_id = str(nft_id)
         self.owner = owner
         self.template_id = template_id
         self.template_name = template_name
@@ -89,7 +89,7 @@ class WaxNFT:
             if data:
                 sale = data[0]
                 price = sale.get("listing_price", None)
-                sale_id = sale.get("sale_id", None)
+                sale_id = int(sale.get("sale_id", None))
                 if price:
                     price = float(price) / 10**8
 
@@ -156,7 +156,7 @@ class WaxNFT:
     
 
     def transfer(self, new_owner, memo=""):
-        """Transfers the NFT to a new owner."""
+        """Transfers the NFT to a new owner"""
 
         if not self.owner:
             self.fetch_owner()
@@ -174,11 +174,11 @@ class WaxNFT:
         }
         self._send_transaction([action])
         self.owner = new_owner
-        print(f"NFT {self.nft_id} transferred to {new_owner}.")
+        print(f"NFT {self.nft_id} transferred to {new_owner}")
 
 
     def sell(self, price):
-        """Lists the NFT for sale on the atomicmarket."""
+        """Lists the NFT for sale on the atomicmarket"""
 
         if not self.owner:
             self.fetch_owner()
@@ -212,11 +212,50 @@ class WaxNFT:
         self._send_transaction([action_announcesale, action_createoffer])
 
         self.price = price
-        print(f"NFT {self.nft_id} listed for sale at {price} WAX.")
+        print(f"NFT {self.nft_id} listed for sale at {price} WAX")
 
 
-    def buy(self):
-        """Buys the NFT listed for sale with bundled transactions."""
+    def buy(self, buyer):
+        """Buys the NFT listed for sale"""
 
-        print("Buy method not implemented")
-        pass
+        if self.sale_id or self.price is None:
+            self.fetch_market_details()
+
+        action_assertsale = {
+            "account": "atomicmarket",
+            "name": "assertsale",
+            "authorization": [{"actor": buyer, "permission": "active"}],
+            "data": {
+                "asset_ids_to_assert": [self.nft_id],
+                "sale_id": self.sale_id,
+                "listing_price_to_assert": f"{self.price:.8f} WAX",
+                "settlement_symbol_to_assert": "8,WAX",
+            },
+        }
+
+        action_transfer = {
+            "account": "eosio.token",
+            "name": "transfer",
+            "authorization": [{"actor": buyer, "permission": "active"}],
+            "data": {
+                "from": buyer,
+                "to": "atomicmarket",
+                "quantity": f"{self.price:.8f} WAX",
+                "memo": "deposit",
+            },
+        }
+
+        action_purchasesale = {
+            "account": "atomicmarket",
+            "name": "purchasesale",
+            "authorization": [{"actor": buyer, "permission": "active"}],
+            "data": {
+                "buyer": buyer,
+                "intended_delphi_median": 0,
+                "sale_id": self.sale_id,
+                "taker_marketplace": "",
+            },
+        }
+
+        self._send_transaction([action_assertsale, action_transfer, action_purchasesale])
+        print(f"NFT {self.nft_id} bought for {self.price} WAX")
