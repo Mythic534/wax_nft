@@ -41,7 +41,7 @@ class WaxNFT:
     "--------------INFORMATION METHODS--------------"
 
 
-    def fetch_nft_details(self, callback=None):
+    def fetch_details(self, callback=None):
         """Fetches ALL the details of the NFT and updates the object properties."""
 
         url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
@@ -67,7 +67,8 @@ class WaxNFT:
                 }
             
                 if callback:
-                    callback(details)
+                    formatted_details = json.dumps(details, indent=4)
+                    callback(formatted_details)
 
                 return details
 
@@ -89,7 +90,7 @@ class WaxNFT:
             if data:
                 sale = data[0]
                 price = sale.get("listing_price", None)
-                sale_id = int(sale.get("sale_id", None))
+                sale_id = sale.get("sale_id", None)
                 if price:
                     price = float(price) / 10**8
 
@@ -141,7 +142,7 @@ class WaxNFT:
 
             # Call transfer.js
             result = subprocess.run(
-                ["node", transfer_js_path],
+                ["node", "--no-warnings", transfer_js_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True

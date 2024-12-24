@@ -4,11 +4,11 @@ import requests
 def get_collection_by_templates(account, template_ids):
 
     combined_nft_ids = []
-    api = "https://wax.api.atomicassets.io"
+    api = "https://wax.api.atomicassets.io/"
 
     for template_id in template_ids:
         
-        endpoint = f"/atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
+        endpoint = f"atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
         url = api + endpoint
 
         response = requests.get(url)
@@ -31,9 +31,9 @@ def get_collection_by_templates(account, template_ids):
 def get_collection_by_category(account, schema_name):
 
     combined_nft_ids = []
-    api = "https://wax.api.atomicassets.io"
+    api = "https://wax.api.atomicassets.io/"
         
-    endpoint = f"/atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
+    endpoint = f"atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
     url = api + endpoint
 
     response = requests.get(url)

@@ -50,9 +50,6 @@ while True:
             # sending an already existing active to the account would break it
             if source == "battleminers" and active_id not in new_actives:
                 new_actives.append(active_id)
-
-        #print(f"Debug - senders: {senders}")
-        #print(f"Debug - actives: {new_actives}")
         
         if len(new_actives) == len(senders):
             break
