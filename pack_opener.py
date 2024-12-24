@@ -44,11 +44,15 @@ while True:
         for active_id in actives:
             nft = WaxNFT(active_id)
             source = nft.fetch_previous_owner()
+            active_id
 
             # Only match freshly minted actives to senders, otherwise
             # sending an already existing active to the account would break it
-            if source == "battleminers" and nft not in new_actives:
-                new_actives.append(nft)
+            if source == "battleminers" and active_id not in new_actives:
+                new_actives.append(active_id)
+
+        print(f"Debug - senders: {senders}")
+        print(f"Debug - actives: {new_actives}")
         
         if len(new_actives) == len(senders):
             break
@@ -56,10 +60,11 @@ while True:
         wait()
 
     # Return NFTs to senders before resetting the loop
-    for sender, active_nft in zip(senders, new_actives):
+    for sender, active in zip(senders, new_actives):
         while True:
             try:
-                active_nft.transfer(sender)
+                nft = WaxNFT(active)
+                nft.transfer(sender)
                 wait()
                 break
             except:
