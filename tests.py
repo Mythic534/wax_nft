@@ -7,7 +7,7 @@ nft = WaxNFT(1099895475693)
 # nft.transfer("5wme4.wam")
 
 "Buy NFT using the account lean4lan.gm"
-nft.buy("lean4lan.gm")
+# nft.buy("lean4lan.gm")
 
 "Sell NFT for 1.5 wax"
 # nft.sell(1.5)
