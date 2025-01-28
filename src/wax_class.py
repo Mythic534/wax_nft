@@ -3,7 +3,39 @@ import subprocess
 import os
 import requests
 
-class WaxNFT:
+class WaxTransaction:
+    """Base class to handle Wax transactions."""
+
+    def _send_transaction(self, actions):
+        """Run transfer.js to execute transaction"""
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        actions_path = os.path.join(script_dir, "actions.json")
+        transfer_js_path = os.path.join(script_dir, "transfer.js")
+
+        # Write actions to actions.json
+        try:
+            with open(actions_path, "w") as f:
+                json.dump(actions, f, indent=4)
+
+            # Call transfer.js
+            result = subprocess.run(
+                ["node", "--no-warnings", transfer_js_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+
+            if result.returncode != 0:
+                raise RuntimeError(f"JavaScript error: {result.stderr.strip()}")
+            print("tx_id:", result.stdout.strip())
+
+        except Exception as e:
+            raise RuntimeError(f"Error during transaction: {e}")
+        
+
+class WaxNFT(WaxTransaction):
+    """Handle NFT-specific operations."""
 
     def __init__(self, nft_id, owner=None, template_id=None, template_name=None, price=None, sale_id=None):
         self.nft_id = str(nft_id)
@@ -19,7 +51,7 @@ class WaxNFT:
 
     
     def fetch_owner(self):
-        """Ensures that self.owner is fetched and available."""
+        """Ensure that self.owner is fetched and available."""
 
         if not self.owner:
             url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
@@ -42,13 +74,14 @@ class WaxNFT:
 
 
     def fetch_details(self, callback=None):
-        """Fetches ALL the details of the NFT and updates the object properties."""
+        """Fetch ALL the details of the NFT and update the object properties."""
 
         url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
         response = requests.get(url)
 
         if response.status_code == 200:
             data = response.json().get("data")
+
             if data:
                 self.owner = data.get("owner", self.owner)
                 self.template_id = data.get("template", {}).get("template_id", self.template_id)
@@ -79,7 +112,7 @@ class WaxNFT:
         
 
     def fetch_market_details(self):
-        """Fetches the sale price and sale ID for the NFT if it is listed on the marketplace."""
+        """Fetch the sale price and sale ID for the NFT if it is listed on the marketplace."""
 
         url = f"https://wax.api.atomicassets.io/atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
         response = requests.get(url)
@@ -102,11 +135,11 @@ class WaxNFT:
     
 
     def fetch_previous_owner(self):
-        """Fetches the previous owner of the NFT by inspecting the last transfer"""
+        """Fetch the previous owner of the NFT by inspecting the last transfer"""
 
         self.fetch_owner()
 
-        url = f"https://wax.api.atomicassets.io/atomicmarket/v1/transfers?asset_id={self.nft_id}&limit=1"
+        url = f"https://wax.api.atomicassets.io/atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -128,7 +161,7 @@ class WaxNFT:
 
 
     def _send_transaction(self, actions):
-        """Runs transfer.js to execute transaction"""
+        """Run transfer.js to execute transaction"""
 
         # Ensure actions.json is written to the same directory as this file
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -156,8 +189,8 @@ class WaxNFT:
             raise RuntimeError(f"Error during transaction: {e}")
     
 
-    def transfer(self, new_owner, memo=""):
-        """Transfers the NFT to a new owner"""
+    def transfer(self, recipient, memo=""):
+        """Transfer the NFT to a new owner"""
 
         if not self.owner:
             self.fetch_owner()
@@ -168,18 +201,18 @@ class WaxNFT:
             "authorization": [{"actor": self.owner, "permission": "active"}],
             "data": {
                 "from": self.owner,
-                "to": new_owner,
+                "to": recipient,
                 "asset_ids": [self.nft_id],
                 "memo": memo,
             },
         }
         self._send_transaction([action])
-        self.owner = new_owner
-        print(f"NFT {self.nft_id} transferred to {new_owner}")
+        self.owner = recipient
+        print(f"NFT {self.nft_id} transferred to {recipient}")
 
 
     def sell(self, price):
-        """Lists the NFT for sale on the atomicmarket"""
+        """List the NFT for sale on the atomicmarket"""
 
         if not self.owner:
             self.fetch_owner()
@@ -260,3 +293,111 @@ class WaxNFT:
 
         self._send_transaction([action_assertsale, action_transfer, action_purchasesale])
         print(f"NFT {self.nft_id} bought for {self.price} WAX")
+
+
+class WaxAccount(WaxTransaction):
+    """Handle token-specific operations."""
+
+    def __init__(self, account):
+        self.account = account
+        self.wax_balance = None
+        self.cpu_staked = None
+        self.net_staked = None
+
+
+    "--------------INFORMATION METHODS--------------"
+
+
+    def fetch_details(self):
+        """Fetch and display account information, update the object properties"""
+
+        url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json().get("account")
+
+            if data:
+                wax_balance = data.get("core_liquid_balance", self.wax_balance)
+                cpu_staked = data.get("cpu_weight", self.cpu_staked)
+                net_staked = data.get("net_weight", self.net_staked)
+
+                self.wax_balance = float(wax_balance.split(" ")[0])
+                self.cpu_staked = float(cpu_staked) / 10**8
+                self.net_staked = float(net_staked) / 10**8
+
+                details = {
+                    "account": self.account,
+                    "wax_balance": self.wax_balance,
+                    "cpu_staked": self.cpu_staked,
+                    "net_staked": self.net_staked,
+                }
+
+                formatted_details = json.dumps(details, indent=4)
+                print(formatted_details)
+                return details
+
+            else:
+                raise ValueError(f"Account {self.account} not found.")
+        else:
+            raise ValueError(f"Failed to fetch details for account {self.account}. HTTP Status: {response.status_code}")
+    
+
+    "--------------TRANSACTION METHODS--------------"
+
+
+    def unstake_wax(self, from_account, cpu_amount=0, net_amount=0):
+        """Unstake wax from account"""
+
+        action = {
+            "account": "eosio",
+            "name": "undelegatebw",
+            "authorization": [{"actor": self.account, "permission": "active"}],
+            "data": {
+                "from": self.account,
+                "receiver": from_account,
+                "unstake_cpu_quantity": f"{cpu_amount:.8f} WAX",
+                "unstake_net_quantity": f"{net_amount:.8f} WAX",
+            },
+        }
+
+        self._send_transaction([action])
+        print(f"{self.account} unstaked {cpu_amount} WAX of CPU and {net_amount} WAX of NET from {from_account}")
+
+
+    def transfer_wax(self, recipient, amount, memo=""):
+        """Transfer WAX to recipient"""
+
+        action = {
+            "account": "eosio.token",
+            "name": "transfer",
+            "authorization": [{"actor": self.account, "permission": "active"}],
+            "data": {
+                "from": self.account,
+                "to": recipient,
+                "quantity": f"{amount:.8f} WAX",
+                "memo": memo,
+            },
+        }
+
+        self._send_transaction([action])
+        print(f"{self.account} transferred {amount} WAX to {recipient}")
+
+
+    def bulk_transfer_nfts(self, recipient, nfts_list, memo=""):
+        """Transfer multiple NFTs to a new owner"""
+
+        action = {
+            "account": "atomicassets",
+            "name": "transfer",
+            "authorization": [{"actor": self.account, "permission": "active"}],
+            "data": {
+                "from": self.account,
+                "to": recipient,
+                "asset_ids": [nfts_list],
+                "memo": memo,
+            },
+        }
+
+        self._send_transaction([action])
+        print(f"{len(nfts_list)} NFTs transferred from {self.account} to {recipient}")

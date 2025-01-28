@@ -1,6 +1,5 @@
 import requests
 
-
 def get_collection_by_templates(account, template_ids):
 
     combined_nft_ids = []
@@ -20,12 +19,12 @@ def get_collection_by_templates(account, template_ids):
     if combined_nft_ids:
 
         for i, nft in enumerate(combined_nft_ids, start=1):
-            print(f"{i}) {nft}")
+            print(f"{i}) {nft}", flush=True)
 
         return combined_nft_ids
     
     else:
-        print("Nothing found..")
+        print("Nothing found..", flush=True)
 
 
 def get_collection_by_category(account, schema_name):
@@ -45,12 +44,12 @@ def get_collection_by_category(account, schema_name):
     if combined_nft_ids:
 
         for i, nft in enumerate(combined_nft_ids, start=1):
-            print(f"{i}) {nft}")
+            print(f"{i}) {nft}", flush=True)
 
         return combined_nft_ids
     
     else:
-        print("Nothing found..")
+        print("Nothing found..", flush=True)
 
 
 """Examples"""
