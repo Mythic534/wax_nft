@@ -1,6 +1,20 @@
 import requests
 
-def get_collection_by_templates(account, template_ids):
+def get_collection_by_templates(account: str, template_ids: list, display: str="full"):
+    """
+    Fetch NFT asset IDs for a given account and list of template IDs.
+
+    Parameters:
+        account (str): The WAX account name.
+        template_ids (list): A list of template IDs to query.
+        display (str): Output mode - "full" (detailed list), "count" (total count), "none" (silent).
+
+    Returns:
+        list: Collected NFT asset IDs or empty list if none found.
+    """
+
+    if isinstance(template_ids, (int, str)):  
+        template_ids = [template_ids]
 
     combined_nft_ids = []
     api = "https://wax.api.atomicassets.io/"
@@ -16,18 +30,30 @@ def get_collection_by_templates(account, template_ids):
         nft_ids = [nft["asset_id"] for nft in data["data"]]
         combined_nft_ids.extend(nft_ids)
 
-    if combined_nft_ids:
+    if not combined_nft_ids:
+        return []
 
-        for i, nft in enumerate(combined_nft_ids, start=1):
-            print(f"{i}) {nft}", flush=True)
-
-        return combined_nft_ids
+    if display == "full":
+        print("\n".join(f"{i+1}) {nft}" for i, nft in enumerate(combined_nft_ids)), flush=True)  # Single print call is more efficient here
     
-    else:
-        print("Nothing found..", flush=True)
+    if display == "count":
+        print(f"{len(combined_nft_ids)} NFTs found", flush=True)
+    
+    return combined_nft_ids
 
 
-def get_collection_by_category(account, schema_name):
+def get_collection_by_category(account, schema_name, display="full"):
+    """
+    Fetch NFT asset IDs for a given account and schema name.
+
+    Parameters:
+        account (str): The WAX account name.
+        schema_name (str): The schema name to query.
+        display (str): Output mode - "full" (detailed list), "count" (total count), "none" (silent).
+
+    Returns:
+        list: Collected NFT asset IDs or empty list if none found.
+    """
 
     combined_nft_ids = []
     api = "https://wax.api.atomicassets.io/"
@@ -41,18 +67,13 @@ def get_collection_by_category(account, schema_name):
     nft_ids = [nft["asset_id"] for nft in data["data"]]
     combined_nft_ids.extend(nft_ids)
 
-    if combined_nft_ids:
+    if not combined_nft_ids:
+        return []
 
-        for i, nft in enumerate(combined_nft_ids, start=1):
-            print(f"{i}) {nft}", flush=True)
-
-        return combined_nft_ids
+    if display == "full":
+        print("\n".join(f"{i+1}) {nft}" for i, nft in enumerate(combined_nft_ids)), flush=True)  # Single print call is more efficient here
     
-    else:
-        print("Nothing found..", flush=True)
-
-
-"""Examples"""
-
-#get_collection_by_templates("lean4lan.gm", ["350147", "408663"])
-#get_collection_by_category("lean4lan.gm", "active")
+    if display == "count":
+        print(f"{len(combined_nft_ids)} NFTs found", flush=True)
+    
+    return combined_nft_ids

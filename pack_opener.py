@@ -14,7 +14,7 @@ def wait(seconds=rate_limit_seconds):
 
 while True:
     print("\nFetching packs:", flush=True)
-    packs = get_collection_by_templates(account, template_ids)
+    packs = get_collection_by_templates(account, template_ids, display="count")
 
     if not packs:
         wait()
@@ -27,48 +27,66 @@ while True:
     for pack_id in packs:
         nft = WaxNFT(pack_id)
         sender = nft.fetch_previous_owner()
-        senders.append(sender)
 
-        nft.transfer("battleminers", "pack_opening")
+        try:
+            nft.transfer("battleminers", "pack_opening")
+            senders.append(sender)
+        except:
+            print("Transfer unsuccessful.. continuing")
+            pass
+
         wait()
 
-    # Iterate through received actives until they all arrive
-    while True:
-        print("\nFetching actives:", flush=True)
+    total_actives = len(senders)
+    attempts = 0
+    max_attempts = 20
 
-        actives = get_collection_by_category(account, "active")
-        if not actives:
-            wait()
-            continue
+    wait_time = 6
+    print("\rWaiting for packs..", end="", flush=True)
+    for i in range(wait_time, 0, -1):
+        sys.stdout.write(f"\rWaiting for packs.. {i}s ")
+        sys.stdout.flush()
+        wait(1)
+
+    # Iterate through received actives until they all arrive or max attempts reached
+    print("\nFetching actives:", end="", flush=True)
+
+    while attempts < max_attempts:
+        actives = get_collection_by_category(account, "active", display="none")
         
-        current_progress = 0
-        total_actives = len(senders)
-        for active_id in actives:
-            nft = WaxNFT(active_id)
-            try:
-                source = nft.fetch_previous_owner()
-            except Exception as e:
-                print(f"Error fetching previous owner for {active_id}: {e}", flush=True)
-                wait()
-                continue
+        sys.stdout.write(f"\rFetching actives: Attempt {attempts + 1}/{max_attempts} | {len(actives)} / {total_actives} ")
+        sys.stdout.flush()
 
-            wait(0.1)  # Adjust to avoid rate-limiting for large sets of data
-
-            # Only match freshly minted actives to senders, otherwise
-            # sending an already existing active to the account would break it
-            if source == "battleminers" and active_id not in new_actives:
-                new_actives.append(active_id)
-
-            current_progress += 1
-            progress_display = f" {current_progress} / {total_actives} "
-            sys.stdout.write(f"\rProgress: {progress_display}")
-            sys.stdout.flush()
-
-        if len(new_actives) == total_actives:
+        if len(actives) == total_actives:
             break
 
+        attempts += 1
         wait()
 
+    current_progress = 0
+
+    for active_id in actives:
+        nft = WaxNFT(active_id)
+        try:
+            source = nft.fetch_previous_owner()
+        except Exception as e:
+            print(f"Error fetching previous owner for {active_id}: {e}", flush=True)
+            wait()
+            continue
+
+        wait(0.1)  # Adjust to avoid rate-limiting for large sets of data
+
+        # Only match freshly minted actives to senders, otherwise
+        # sending an already existing active to the account would break it
+        if source == "battleminers" and active_id not in new_actives:
+            new_actives.append(active_id)
+
+        current_progress += 1
+        progress_display = f" {current_progress} / {total_actives} "
+        sys.stdout.write(f"\rProgress: {progress_display}")
+        sys.stdout.flush()
+
+    print("\n")
     # Return NFTs to senders before resetting the loop
     for sender, active in zip(senders, new_actives):
         while True:

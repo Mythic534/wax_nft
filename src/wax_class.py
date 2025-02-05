@@ -347,7 +347,7 @@ class WaxAccount(WaxTransaction):
 
 
     def unstake_wax(self, from_account, cpu_amount=0, net_amount=0):
-        """Unstake wax from account"""
+        """Unstake WAX from account"""
 
         action = {
             "account": "eosio",
