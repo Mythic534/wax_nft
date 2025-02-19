@@ -394,7 +394,7 @@ class WaxAccount(WaxTransaction):
             "data": {
                 "from": self.account,
                 "to": recipient,
-                "asset_ids": [nfts_list],
+                "asset_ids": nfts_list,
                 "memo": memo,
             },
         }

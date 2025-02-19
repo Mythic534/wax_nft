@@ -1,24 +1,31 @@
 import time
 import sys
 
-from src.wax_class import WaxNFT
-from src.wax_tools import get_collection_by_templates, get_collection_by_category
+from src.wax_class import WaxNFT, WaxAccount
+from src.wax_tools import get_collection_by_templates, get_collection_by_category, group_transactions
 
 account = "lean4lan.gm"
 template_ids = ["350147", "408663"]  # Active card Mining pack, Active card War pack
 rate_limit_seconds = 2
+account_class = WaxAccount(account)
 
 def wait(seconds=rate_limit_seconds):
     time.sleep(seconds)
 
-
+iter = 0
 while True:
-    print("\nFetching packs:", flush=True)
-    packs = get_collection_by_templates(account, template_ids, display="count")
+
+    iter += 1
+    sys.stdout.write(f"\rFetching packs: ({iter})")
+    sys.stdout.flush()
+
+    packs = get_collection_by_templates(account, template_ids)
 
     if not packs:
         wait()
         continue
+
+    print(f"\n{len(packs)} NFTs found")
 
     senders = []
     new_actives = []
@@ -37,14 +44,14 @@ while True:
 
         wait()
 
+    print()
     total_actives = len(senders)
     attempts = 0
     max_attempts = 20
 
     wait_time = 6
-    print("\n" * 2)
     for i in range(wait_time, 0, -1):
-        sys.stdout.write(f"\rWaiting for packs.. {i - 1}s ")
+        sys.stdout.write(f"\rWaiting for actives.. {i - 1}s")
         sys.stdout.flush()
         wait(1)
 
@@ -53,7 +60,7 @@ while True:
     while attempts < max_attempts:
         actives = get_collection_by_category(account, "active", display="none")
         
-        sys.stdout.write(f"\rFetching actives: Attempt {attempts + 1}/{max_attempts} | {len(actives)} / {total_actives} ")
+        sys.stdout.write(f"\rFetching actives: Attempt {attempts + 1}/{max_attempts} | {len(actives)} / {total_actives}")
         sys.stdout.flush()
 
         if len(actives) == total_actives:
@@ -88,13 +95,12 @@ while True:
 
     print()
     # Return NFTs to senders before resetting the loop
-    for sender, active in zip(senders, new_actives):
-        while True:
-            try:
-                nft = WaxNFT(active)
-                nft.transfer(sender)
-                wait(0.5)
-                break
-            except Exception as e:
-                print(f"Error transferring {active} to {sender}: {e}", flush=True)
-                wait()
+    transactions = group_transactions(new_actives, senders)
+
+    for wallet in transactions:
+        for transaction in transactions[wallet]:
+            account_class.bulk_transfer_nfts(wallet, transaction)
+            wait(0.5)
+    
+    print()
+    iter = 0
