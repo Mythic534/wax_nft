@@ -42,15 +42,14 @@ while True:
     max_attempts = 20
 
     wait_time = 6
-    print("\rWaiting for packs..", end="", flush=True)
+    print("\n" * 2)
     for i in range(wait_time, 0, -1):
-        sys.stdout.write(f"\rWaiting for packs.. {i}s ")
+        sys.stdout.write(f"\rWaiting for packs.. {i - 1}s ")
         sys.stdout.flush()
         wait(1)
 
+    print()
     # Iterate through received actives until they all arrive or max attempts reached
-    print("\nFetching actives:", end="", flush=True)
-
     while attempts < max_attempts:
         actives = get_collection_by_category(account, "active", display="none")
         
@@ -63,6 +62,7 @@ while True:
         attempts += 1
         wait()
 
+    print()
     current_progress = 0
 
     for active_id in actives:
@@ -83,10 +83,10 @@ while True:
 
         current_progress += 1
         progress_display = f" {current_progress} / {total_actives} "
-        sys.stdout.write(f"\rProgress: {progress_display}")
+        sys.stdout.write(f"\rMapping actives to senders: {progress_display}")
         sys.stdout.flush()
 
-    print("\n")
+    print()
     # Return NFTs to senders before resetting the loop
     for sender, active in zip(senders, new_actives):
         while True:
