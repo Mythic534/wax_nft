@@ -105,9 +105,6 @@ def main():
                         sender_password
                     )
 
-                else:
-                    pass
-
         wait()
 
 
