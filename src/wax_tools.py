@@ -1,4 +1,5 @@
 import requests
+import json
 
 def get_collection_by_templates(account: str, template_ids: list, display: str="none"):
     """
@@ -77,6 +78,47 @@ def get_collection_by_category(account, schema_name, display="none"):
         print(f"{len(combined_nft_ids)} NFTs found", flush=True)
     
     return combined_nft_ids
+
+
+def get_lowest_listing(template_id):
+    """
+    Fetches the lowest-priced listing for the given template.
+
+    Returns:
+        dict: Collected NFT info or empty dict if none found.
+    """
+    
+    url = "https://wax-atomic-api.eosphere.io/atomicmarket/v2/sales"
+    params = {
+        "template_id": template_id,
+        "limit": "1",
+        "order": "asc",
+        "page": "1",
+        "sort": "price",
+        "state": "1",
+        "symbol": "WAX"
+    }
+    
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
+    response = requests.get(url, params=params, headers={'User-Agent': user_agent})
+    data = response.json().get("data")
+
+    if data:
+        asset_id = data[0].get("assets")[0].get("asset_id")
+        sale_id = data[0].get("sale_id")
+        price = data[0].get("price").get("amount")
+        price = float(price) / 10**8
+
+    else:
+        return {}
+
+    details = {
+        "asset_id": asset_id,
+        "sale_id": sale_id,
+        "price": price
+    }
+
+    return details
 
 
 def group_transactions(nft_ids: list, recepients: list, group_size: int = 50):

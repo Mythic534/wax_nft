@@ -24,6 +24,9 @@ while True:
     if not packs:
         wait()
         continue
+    
+    wait()  # Try to identify all packs in the first pass, may need adjusting
+    packs = get_collection_by_templates(account, template_ids)
 
     print(f"\n{len(packs)} NFTs found")
 

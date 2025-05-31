@@ -158,35 +158,6 @@ class WaxNFT(WaxTransaction):
             
     
     "--------------TRANSACTION METHODS--------------"
-
-
-    def _send_transaction(self, actions):
-        """Run transfer.js to execute transaction"""
-
-        # Ensure actions.json is written to the same directory as this file
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        actions_path = os.path.join(script_dir, "actions.json")
-        transfer_js_path = os.path.join(script_dir, "transfer.js")
-
-        # Write actions to actions.json
-        try:
-            with open(actions_path, "w") as f:
-                json.dump(actions, f, indent=4)
-
-            # Call transfer.js
-            result = subprocess.run(
-                ["node", "--no-warnings", transfer_js_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-
-            if result.returncode != 0:
-                raise RuntimeError(f"JavaScript error: {result.stderr.strip()}")
-            print("tx_id:", result.stdout.strip())
-
-        except Exception as e:
-            raise RuntimeError(f"Error during transaction: {e}")
     
 
     def transfer(self, recipient, memo=""):
@@ -308,7 +279,7 @@ class WaxAccount(WaxTransaction):
     "--------------INFORMATION METHODS--------------"
 
 
-    def fetch_details(self):
+    def fetch_details(self, callback=None):
         """Fetch and display account information, update the object properties"""
 
         url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"
@@ -333,8 +304,10 @@ class WaxAccount(WaxTransaction):
                     "net_staked": self.net_staked,
                 }
 
-                formatted_details = json.dumps(details, indent=4)
-                print(formatted_details)
+                if callback:
+                    formatted_details = json.dumps(details, indent=4)
+                    callback(formatted_details)
+                    
                 return details
 
             else:
@@ -384,8 +357,8 @@ class WaxAccount(WaxTransaction):
         print(f"{self.account} transferred {amount} WAX to {recipient}")
 
 
-    def bulk_transfer_nfts(self, recipient, nfts_list, memo=""):
-        """Transfer multiple NFTs to a new owner"""
+    def bulk_transfer_nfts(self, recipient, nfts_list: list, memo=""):
+        """Transfer single or multiple NFTs to a new owner"""
 
         action = {
             "account": "atomicassets",
