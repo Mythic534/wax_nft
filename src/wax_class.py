@@ -55,7 +55,8 @@ class WaxNFT(WaxTransaction):
 
         if not self.owner:
             url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
-            response = requests.get(url)
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(url, headers=headers)
 
             if response.status_code == 200:
                 data = response.json().get("data")
@@ -77,7 +78,8 @@ class WaxNFT(WaxTransaction):
         """Fetch ALL the details of the NFT and update the object properties."""
 
         url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -115,7 +117,8 @@ class WaxNFT(WaxTransaction):
         """Fetch the sale price and sale ID for the NFT if it is listed on the marketplace."""
 
         url = f"https://wax.api.atomicassets.io/atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -140,7 +143,8 @@ class WaxNFT(WaxTransaction):
         self.fetch_owner()
 
         url = f"https://wax.api.atomicassets.io/atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -283,7 +287,8 @@ class WaxAccount(WaxTransaction):
         """Fetch and display account information, update the object properties"""
 
         url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             data = response.json().get("account")

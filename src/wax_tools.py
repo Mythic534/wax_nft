@@ -1,5 +1,4 @@
 import requests
-import json
 
 def get_collection_by_templates(account: str, template_ids: list, display: str="none"):
     """
@@ -14,7 +13,7 @@ def get_collection_by_templates(account: str, template_ids: list, display: str="
         list: Collected NFT asset IDs or empty list if none found.
     """
 
-    if isinstance(template_ids, (int, str)):  
+    if isinstance(template_ids, (int, str)):
         template_ids = [template_ids]
 
     combined_nft_ids = []
@@ -25,7 +24,8 @@ def get_collection_by_templates(account: str, template_ids: list, display: str="
         endpoint = f"atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
         url = api + endpoint
 
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
         data = response.json()
 
         nft_ids = [nft["asset_id"] for nft in data["data"]]
@@ -62,7 +62,8 @@ def get_collection_by_category(account, schema_name, display="none"):
     endpoint = f"atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
     url = api + endpoint
 
-    response = requests.get(url)
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers)
     data = response.json()
 
     nft_ids = [nft["asset_id"] for nft in data["data"]]
