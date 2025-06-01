@@ -117,11 +117,14 @@ def notification(message, email_sender, email_recipient, sender_password):
     part1 = MIMEText(message, 'plain', 'utf-8')
     msg.attach(part1)
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.ehlo()
-        server.starttls()
-        server.login(email_sender, sender_password)
-        server.sendmail(email_sender, email_recipient, msg.as_string())
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(email_sender, sender_password)
+            server.sendmail(email_sender, email_recipient, msg.as_string())
+    except:
+        pass  # Will fail in case of internet outage
 
 
 def check_balance(wax_balance, low_balance_notified):
