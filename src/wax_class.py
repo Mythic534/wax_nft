@@ -2,6 +2,11 @@ import json
 import subprocess
 import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+API_ENDPOINT = os.getenv("API_ENDPOINT", "https://default.endpoint.com")
+
 
 class WaxTransaction:
     """Base class to handle Wax transactions."""
@@ -54,7 +59,7 @@ class WaxNFT(WaxTransaction):
         """Ensure that self.owner is fetched and available."""
 
         if not self.owner:
-            url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
+            url = f"{API_ENDPOINT}/atomicassets/v1/assets/{self.nft_id}"
             headers = {"User-Agent": "Mozilla/5.0"}
             response = requests.get(url, headers=headers)
 
@@ -77,7 +82,7 @@ class WaxNFT(WaxTransaction):
     def fetch_details(self, callback=None):
         """Fetch ALL the details of the NFT and update the object properties."""
 
-        url = f"https://wax.api.atomicassets.io/atomicassets/v1/assets/{self.nft_id}"
+        url = f"{API_ENDPOINT}/atomicassets/v1/assets/{self.nft_id}"
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
 
@@ -116,7 +121,7 @@ class WaxNFT(WaxTransaction):
     def fetch_market_details(self):
         """Fetch the sale price and sale ID for the NFT if it is listed on the marketplace."""
 
-        url = f"https://wax.api.atomicassets.io/atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
+        url = f"{API_ENDPOINT}/atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
 
@@ -142,7 +147,7 @@ class WaxNFT(WaxTransaction):
 
         self.fetch_owner()
 
-        url = f"https://wax.api.atomicassets.io/atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
+        url = f"{API_ENDPOINT}/atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
 
@@ -286,7 +291,7 @@ class WaxAccount(WaxTransaction):
     def fetch_details(self, callback=None):
         """Fetch and display account information, update the object properties"""
 
-        url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"
+        url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"  # Requires different endpoint
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
 

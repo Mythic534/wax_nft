@@ -1,4 +1,10 @@
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+API_ENDPOINT = os.getenv("API_ENDPOINT", "https://default.endpoint.com")
+
 
 def get_collection_by_templates(account: str, template_ids: list, display: str="none"):
     """
@@ -17,12 +23,11 @@ def get_collection_by_templates(account: str, template_ids: list, display: str="
         template_ids = [template_ids]
 
     combined_nft_ids = []
-    api = "https://wax.api.atomicassets.io/"
 
     for template_id in template_ids:
         
-        endpoint = f"atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
-        url = api + endpoint
+        path = f"/atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
+        url = API_ENDPOINT + path
 
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
@@ -57,10 +62,9 @@ def get_collection_by_category(account, schema_name, display="none"):
     """
 
     combined_nft_ids = []
-    api = "https://wax.api.atomicassets.io/"
         
-    endpoint = f"atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
-    url = api + endpoint
+    path = f"/atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
+    url = API_ENDPOINT + path
 
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(url, headers=headers)
@@ -73,7 +77,7 @@ def get_collection_by_category(account, schema_name, display="none"):
         return []
 
     if display == "full":
-        print("\n".join(f"{i+1}) {nft}" for i, nft in enumerate(combined_nft_ids)), flush=True)  # Single print call is more efficient here
+        print("\n".join(f"{i+1}) {nft}" for i, nft in enumerate(combined_nft_ids)), flush=True)
     
     if display == "count":
         print(f"{len(combined_nft_ids)} NFTs found", flush=True)
@@ -89,7 +93,9 @@ def get_lowest_listing(template_id):
         dict: Collected NFT info or empty dict if none found.
     """
     
-    url = "https://wax-atomic-api.eosphere.io/atomicmarket/v2/sales"
+    path = f"/atomicmarket/v2/sales"
+    url = API_ENDPOINT + path
+
     params = {
         "template_id": template_id,
         "limit": "1",
