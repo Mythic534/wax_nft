@@ -1,10 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-API_ENDPOINT = os.getenv("API_ENDPOINT", "https://default.endpoint.com")
-
+from src.api_session import api_get
 
 def get_collection_by_templates(account: str, template_ids: list, display: str="none"):
     """
@@ -26,11 +23,8 @@ def get_collection_by_templates(account: str, template_ids: list, display: str="
 
     for template_id in template_ids:
         
-        path = f"/atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
-        url = API_ENDPOINT + path
-
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        path = f"atomicassets/v1/assets?owner={account}&template_id={template_id}&page=1&limit=100&order=desc"
+        response = api_get(path)
         data = response.json()
 
         nft_ids = [nft["asset_id"] for nft in data["data"]]
@@ -63,11 +57,8 @@ def get_collection_by_category(account, schema_name, display="none"):
 
     combined_nft_ids = []
         
-    path = f"/atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
-    url = API_ENDPOINT + path
-
-    headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
+    path = f"atomicassets/v1/assets?owner={account}&schema_name={schema_name}&page=1&limit=100&order=desc"
+    response = api_get(path)
     data = response.json()
 
     nft_ids = [nft["asset_id"] for nft in data["data"]]
@@ -93,9 +84,7 @@ def get_lowest_listing(template_id):
         dict: Collected NFT info or empty dict if none found.
     """
     
-    path = f"/atomicmarket/v2/sales"
-    url = API_ENDPOINT + path
-
+    path = f"atomicmarket/v2/sales"
     params = {
         "template_id": template_id,
         "limit": "1",
@@ -105,9 +94,7 @@ def get_lowest_listing(template_id):
         "state": "1",
         "symbol": "WAX"
     }
-    
-    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
-    response = requests.get(url, params=params, headers={'User-Agent': user_agent})
+    response = api_get(path, params=params)
     data = response.json().get("data")
 
     if data:

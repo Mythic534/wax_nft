@@ -3,9 +3,7 @@ import subprocess
 import os
 import requests
 from dotenv import load_dotenv
-
-load_dotenv()
-API_ENDPOINT = os.getenv("API_ENDPOINT", "https://default.endpoint.com")
+from src.api_session import api_get
 
 
 class WaxTransaction:
@@ -59,9 +57,8 @@ class WaxNFT(WaxTransaction):
         """Ensure that self.owner is fetched and available."""
 
         if not self.owner:
-            url = f"{API_ENDPOINT}/atomicassets/v1/assets/{self.nft_id}"
-            headers = {"User-Agent": "Mozilla/5.0"}
-            response = requests.get(url, headers=headers)
+            path = f"atomicassets/v1/assets/{self.nft_id}"
+            response = api_get(path)
 
             if response.status_code == 200:
                 data = response.json().get("data")
@@ -82,9 +79,8 @@ class WaxNFT(WaxTransaction):
     def fetch_details(self, callback=None):
         """Fetch ALL the details of the NFT and update the object properties."""
 
-        url = f"{API_ENDPOINT}/atomicassets/v1/assets/{self.nft_id}"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        path = f"atomicassets/v1/assets/{self.nft_id}"
+        response = api_get(path)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -121,9 +117,8 @@ class WaxNFT(WaxTransaction):
     def fetch_market_details(self):
         """Fetch the sale price and sale ID for the NFT if it is listed on the marketplace."""
 
-        url = f"{API_ENDPOINT}/atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        path = f"atomicmarket/v1/sales?asset_id={self.nft_id}&state=1"
+        response = api_get(path)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -147,9 +142,8 @@ class WaxNFT(WaxTransaction):
 
         self.fetch_owner()
 
-        url = f"{API_ENDPOINT}/atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        path = f"atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
+        response = api_get(path)
 
         if response.status_code == 200:
             data = response.json().get("data")
@@ -292,8 +286,7 @@ class WaxAccount(WaxTransaction):
         """Fetch and display account information, update the object properties"""
 
         url = f"https://api.waxsweden.org/v2/state/get_account?limit=1&account={self.account}"  # Requires different endpoint
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        response = api_get(url)
 
         if response.status_code == 200:
             data = response.json().get("account")
