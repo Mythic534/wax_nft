@@ -222,11 +222,87 @@ class WaxNFT(WaxTransaction):
         self.price = price
         print(f"NFT {self.nft_id} listed for sale at {price} WAX")
 
+    
+    def cancel_sale(self):
+        """Cancels the sale of the NFT"""
+
+        if not self.owner:
+            self.fetch_owner()
+
+        if not self.sale_id:
+            self.fetch_market_details()
+        
+        action = {
+            "account": "atomicmarket",
+            "name": "cancelsale",
+            "authorization": [{"actor": self.owner, "permission": "active"}],
+            "data": {  	
+                "sale_id": self.sale_id
+            },
+        }
+
+        self._send_transaction([action])
+        self.price = None
+        self.sale_id = None
+        print(f"Sale {self.sale_id} cancelled")
+
+
+    def update_offer(self, new_price):
+        """Updates the price of the NFT if it is already on sale"""
+
+        if not self.owner:
+            self.fetch_owner()
+
+        if self.sale_id is None or self.price is None:
+            self.fetch_market_details()
+
+        old_price = self.price
+
+        action_cancelsale = {
+            "account": "atomicmarket",
+            "name": "cancelsale",
+            "authorization": [{"actor": self.owner, "permission": "active"}],
+            "data": {  	
+                "sale_id": self.sale_id
+            },
+        }
+
+        action_announcesale = {
+            "account": "atomicmarket",
+            "name": "announcesale",
+            "authorization": [{"actor": self.owner, "permission": "active"}],
+            "data": {
+                "seller": self.owner,
+                "asset_ids": [self.nft_id],
+                "listing_price": f"{new_price:.8f} WAX",
+                "settlement_symbol": "8,WAX",
+                "maker_marketplace": "",
+            },
+        }
+
+        action_createoffer = {
+            "account": "atomicassets",
+            "name": "createoffer",
+            "authorization": [{"actor": self.owner, "permission": "active"}],
+            "data": {
+                "memo": "sale",
+                "sender_asset_ids": [self.nft_id],
+                "recipient": "atomicmarket",
+                "recipient_asset_ids": [],
+                "sender": self.owner,
+            },
+        }
+
+        self._send_transaction([action_cancelsale, action_announcesale, action_createoffer])
+        self.price = new_price
+        self.sale_id = None
+        print(f"Price updated from {old_price} WAX to {self.price} WAX")
+
 
     def buy(self, buyer):
         """Buys the NFT listed for sale"""
 
-        if self.sale_id or self.price is None:
+        if self.sale_id is None or self.price is None:
             self.fetch_market_details()
 
         action_assertsale = {
@@ -264,7 +340,7 @@ class WaxNFT(WaxTransaction):
                 "taker_marketplace": "",
             },
         }
-
+        
         self._send_transaction([action_assertsale, action_transfer, action_purchasesale])
         print(f"NFT {self.nft_id} bought for {self.price} WAX")
 

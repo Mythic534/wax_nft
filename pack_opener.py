@@ -5,7 +5,7 @@ from src.wax_class import WaxNFT, WaxAccount
 from src.wax_tools import get_collection_by_templates, get_collection_by_category, group_transactions
 
 account = "lean4lan.gm"
-template_ids = ["350147", "408663"]  # Active card Mining pack, Active card War pack
+template_ids = ["350147", "408663", "896504"]  # Active card Mining pack, Active card War pack, Basic Active Catalyst pack
 rate_limit_seconds = 2
 account_class = WaxAccount(account)
 
