@@ -35,7 +35,7 @@ while True:
             time.sleep(RATE_LIMIT_SECONDS)
             continue
 
-        new_price = nft.price - wax_increment
+        new_price = lowest_listing.get("price") - wax_increment
         if new_price < min_price:
             print("Minimum price reached")
             break
