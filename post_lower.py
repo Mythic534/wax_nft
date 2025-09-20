@@ -4,7 +4,7 @@ from src.wax_tools import get_lowest_listing
 
 RATE_LIMIT_SECONDS = 5
 API_REFRESH_SECONDS = 40
-ERROR_RETRY_SECONDS = 40
+ERROR_RETRY_SECONDS = 30
 
 # ======Configuration======
 wax_increment = 1
@@ -27,12 +27,14 @@ if nft.sale_id is None:
     nft.sell(start_price)
     time.sleep(API_REFRESH_SECONDS)
 
+err = 0  # Track number of consecutive errors
 while True:
 
     try:
         lowest_listing = get_lowest_listing(template_id)
         if lowest_listing.get("asset_id") == nft_id:
             time.sleep(RATE_LIMIT_SECONDS)
+            err = 0
             continue
 
         new_price = lowest_listing.get("price") - wax_increment
@@ -44,5 +46,7 @@ while True:
         time.sleep(API_REFRESH_SECONDS)
 
     except Exception as e:
-        print(f"{e}. Retrying in {ERROR_RETRY_SECONDS}s..")
-        time.sleep(ERROR_RETRY_SECONDS)
+        err += 1
+        backoff_multiplier = 2**(err-1)
+        print(f"{e}. Retrying in {backoff_multiplier * ERROR_RETRY_SECONDS}s..")
+        time.sleep(backoff_multiplier * ERROR_RETRY_SECONDS)
