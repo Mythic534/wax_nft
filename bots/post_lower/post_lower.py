@@ -78,7 +78,6 @@ def adjust_price_loop(
         try:
             lowest_listing = get_lowest_listing(template_id)
 
-            # If already the lowest listing
             if lowest_listing.get("asset_id") == nft.nft_id:
                 time.sleep(rate_limit_seconds)
                 err_count = 0
