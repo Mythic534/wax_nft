@@ -17,7 +17,6 @@ Do **NOT** add multiple NFTs of the same template. I haven't added any logic for
 # Global settings
 rate_limit_seconds: 5        # Small delay between API calls when no changes are needed
 api_refresh_seconds: 40      # Delay after successful price update or listing
-error_retry_seconds: 30      # Base retry time (exponential backoff applies on errors)
 
 # NFT-specific settings
 nfts:
