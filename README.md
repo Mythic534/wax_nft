@@ -18,14 +18,21 @@ Ensure you have the following installed:
 
    ```env
    PRIVATE_KEY=<YOUR_PRIVATE_KEY>
+   API_ENDPOINT=<VALID_WAX_ENDPOINT>
+
+   # If using market_bot alerts:
+   EMAIL_SENDER=<EMAIL_ACCOUNT>
+   EMAIL_RECIPIENT=<EMAIL_ACCOUNT>
+   EMAIL_PASSWORD=<EMAIL_PASSWORD>
    ```
 
 ### Installing Dependencies
 
-Run the following command to install project dependencies:
+Run the following commands to install project dependencies:
 
 ```bash
 npm install
+pip install -r requirements.txt
 ```
 
 ## Functionality Overview
