@@ -40,8 +40,6 @@ async function transferTokens() {
  
         const actionsData = fs.readFileSync(actionsJsonPath, "utf-8");
         const actions = JSON.parse(actionsData);
- 
-        //console.log("Loaded actions:", actions);
 
         const result = await api.transact(
             { actions: actions },
