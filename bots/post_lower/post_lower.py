@@ -11,13 +11,16 @@ import logging
 from src.wax_class import WaxNFT
 from src.wax_tools import get_lowest_listing
 
+config_path = "./bots/post_lower/config.yaml"
+log_path = "./bots/post_lower/post_lower.log"
+
 # ---------------- Logging Setup ----------------------
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] [%(nft_template)s] %(message)s",
     handlers=[
-        logging.FileHandler("./bots/post_lower/post_lower.log"),
+        logging.FileHandler(log_path),
         logging.StreamHandler()
     ]
 )
@@ -51,6 +54,7 @@ def initialise_nft(nft_id: str, min_price: float, wax_increment: float, api_refr
         logger.info(f"NFT listed for sale at {start_price} WAX")
 
         time.sleep(api_refresh_seconds)
+        nft.fetch_details()
 
     return nft
 
@@ -61,13 +65,13 @@ def adjust_price_loop(
     wax_increment: float,
     rate_limit_seconds: int,
     api_refresh_seconds: int,
-    error_retry_seconds: int,
 ):
     """Main loop for monitoring and adjusting NFT price with exponential backoff on errors."""
 
     logger = get_logger(nft.template_name)
     template_id = nft.template_id
     err_count = 0  # Track number of consecutive errors
+    listing_account = nft.owner
 
     while True:
 
@@ -79,6 +83,17 @@ def adjust_price_loop(
                 time.sleep(rate_limit_seconds)
                 err_count = 0
                 continue
+            
+            # Check if it has sold
+            nft.fetch_market_details()
+            if nft.sale_id is None:
+                time.sleep(api_refresh_seconds)
+
+            owner = nft.fetch_owner()
+            if owner != listing_account:
+                logger.info(f"NFT sold to {owner} for {nft.price} WAX")
+                remove_sold_nft_from_config(config_path, nft.nft_id)
+                break
 
             # Undercut by increment
             new_price = lowest_listing.get("price") - wax_increment
@@ -91,11 +106,13 @@ def adjust_price_loop(
             time.sleep(api_refresh_seconds)
             err_count = 0  # Reset error counter on success
 
-        except Exception as e:
+        except Exception as e:      
+
             err_count += 1
-            backoff = (2 ** (err_count - 1)) * error_retry_seconds
+            backoff = (2 ** (err_count - 1)) * api_refresh_seconds
             logger.error(f"{e}. Retrying in {backoff}s..")
             time.sleep(backoff)
+            nft.fetch_details()
 
 
 def run_price_bot(
@@ -104,11 +121,10 @@ def run_price_bot(
     wax_increment: float,
     rate_limit_seconds: int,
     api_refresh_seconds: int,
-    error_retry_seconds: int,
 ):
     
     nft = initialise_nft(nft_id, min_price, wax_increment, api_refresh_seconds)
-    adjust_price_loop(nft, min_price, wax_increment, rate_limit_seconds, api_refresh_seconds, error_retry_seconds)
+    adjust_price_loop(nft, min_price, wax_increment, rate_limit_seconds, api_refresh_seconds)
 
 
 def run_from_config(config_path):
@@ -120,7 +136,6 @@ def run_from_config(config_path):
     # Global settings
     rate_limit_seconds = cfg["rate_limit_seconds"]
     refresh = cfg["api_refresh_seconds"]
-    retry = cfg["error_retry_seconds"]
 
     for nft_cfg in cfg.get("nfts", []):
         t = threading.Thread(
@@ -131,7 +146,6 @@ def run_from_config(config_path):
                 nft_cfg["wax_increment"],
                 rate_limit_seconds,
                 refresh,
-                retry,
             ),
             daemon=True
         )
@@ -142,5 +156,15 @@ def run_from_config(config_path):
         time.sleep(60)  # We keep the main thread running and use daemons, this allows for easy shutdown via keyboard interrupt
 
 
+def remove_sold_nft_from_config(config_path, nft_id):
+    with open(config_path, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    cfg["nfts"] = [n for n in cfg["nfts"] if n["nft_id"] != nft_id]
+
+    with open(config_path, "w") as f:
+        yaml.safe_dump(cfg, f, sort_keys=False)
+
+
 if __name__ == "__main__":
-    run_from_config("./bots/post_lower/config.yaml")
+    run_from_config(config_path)
