@@ -18,7 +18,7 @@ Ensure you have the following installed:
 
    ```env
    PRIVATE_KEY=<YOUR_PRIVATE_KEY>
-   API_ENDPOINT=<VALID_WAX_ENDPOINT>
+   API_ENDPOINT=<VALID_WAX_ENDPOINT>  # Expects trailing slash '/'
 
    # If using market_bot alerts:
    EMAIL_SENDER=<EMAIL_ACCOUNT>
