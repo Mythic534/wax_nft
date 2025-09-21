@@ -1,6 +1,13 @@
 __pycache__/
+*.pyc
+
 .env
+
 node_modules/
+
 actions.json
-test*.py
+
+tests/
+
 *.log
+bots/*/config.yaml

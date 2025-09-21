@@ -1,7 +1,5 @@
-import requests
-import os
-from dotenv import load_dotenv
 from src.api_session import api_get
+
 
 def get_collection_by_templates(account: str, template_ids: list, display: str="none"):
     """

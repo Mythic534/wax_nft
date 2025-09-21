@@ -1,8 +1,6 @@
 import json
 import subprocess
 import os
-import requests
-from dotenv import load_dotenv
 from src.api_session import api_get
 
 

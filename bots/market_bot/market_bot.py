@@ -14,7 +14,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("market_bot.log"),
+        logging.FileHandler("./bots/market_bot/market_bot.log"),
         logging.StreamHandler()
     ]
 )
@@ -29,7 +29,7 @@ RATE_LIMIT_SECONDS = 0.5
 BALANCE_REFRESH_INTERVAL_SECONDS = 60
 
 template_id = "783873"  # NBM Spin and Win
-target_price = 14
+target_price = 10
 
 
 def main():
@@ -109,6 +109,7 @@ def main():
 
 
 def notification(message, email_sender, email_recipient, sender_password):
+
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "Bot Alert"
     msg['From'] = email_sender

@@ -30,7 +30,7 @@ npm install
 
 ## Functionality Overview
 
-The `tests.py` file demonstrates the capabilities of the `WaxNFT` class and associated tools for managing NFTs on the Wax blockchain. Below is an overview of the operations.
+Provided examples include a market bot which can be configured to buy NFTs, and a selling bot which can manage multiple listings simultaneously. Below is an overview of some of the fundamental operations.
 
 ### 1. Transfer NFT
 
