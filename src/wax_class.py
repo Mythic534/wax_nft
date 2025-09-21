@@ -54,19 +54,18 @@ class WaxNFT(WaxTransaction):
     def fetch_owner(self):
         """Ensure that self.owner is fetched and available."""
 
-        if not self.owner:
-            path = f"atomicassets/v1/assets/{self.nft_id}"
-            response = api_get(path)
+        path = f"atomicassets/v1/assets/{self.nft_id}"
+        response = api_get(path)
 
-            if response.status_code == 200:
-                data = response.json().get("data")
-                if data:
-                    self.owner = data.get("owner")
+        if response.status_code == 200:
+            data = response.json().get("data")
+            if data:
+                self.owner = data.get("owner")
 
-                else:
-                    raise ValueError(f"NFT {self.nft_id} not found.")
             else:
-                raise ValueError(f"Failed to fetch owner for NFT {self.nft_id}. HTTP Status: {response.status_code}")
+                raise ValueError(f"NFT {self.nft_id} not found.")
+        else:
+            raise ValueError(f"Failed to fetch owner for NFT {self.nft_id}. HTTP Status: {response.status_code}")
         
         return self.owner
 
