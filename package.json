@@ -11,5 +11,8 @@
     "dotenv": "^16.4.7",
     "eosjs": "^22.1.0",
     "node-fetch": "^2.7.0"
+  },
+    "overrides": {
+    "elliptic": "^6.6.1"
   }
 }
