@@ -139,6 +139,9 @@ class WaxNFT(WaxTransaction):
 
         self.fetch_owner()
 
+        if self.owner is None:  # NFT burned
+            return None
+
         path = f"atomicassets/v1/transfers?asset_id={self.nft_id}&limit=1"
         response = api_get(path)
 
