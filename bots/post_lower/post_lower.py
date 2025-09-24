@@ -25,11 +25,22 @@ logging.basicConfig(
     ]
 )
 
+
 def get_logger(template_name: str):
     """Return a LoggerAdapter that injects nft_id into log records."""
 
     logger = logging.getLogger("post_lower")
     return logging.LoggerAdapter(logger, {"nft_template": template_name})
+
+
+def thread_excepthook(args):
+    """Catch daemon thread errors"""
+    logging.error(
+        f"Uncaught thread exception: {args.exc_value}",
+        exc_info=(args.exc_type, args.exc_value, args.exc_traceback)
+    )
+
+threading.excepthook = thread_excepthook
 
 
 # ---------------- Bot Logic --------------------------
